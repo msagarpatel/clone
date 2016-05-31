@@ -1,25 +1,25 @@
 #! /bin/bash
 
 # Author        :   Sagar Patel
-# Version       :   1.2
-# Date          :   May 8, 2016
+# Version       :   1.2.1
+# Date          :   May 25, 2016
 # What?         :   This little script here is used to create a bootable copy of your boot drive. This will clone the system root folder (i.e. '/') to '$DEST'. You can change '$DEST' below to whatever drive you want.
 
-# What's New?   :   -Added the version thing as a variable so I don't have to go around and change every verison number during a new version. Also changed the method of showing the version into a function.
-#                   -Using 'getopts' to process options now.
-#                   -Now checking if the '$EXCLUDE_FILE' is present or not.
-#                   -Redirects 'kill' messages to '/dev/null'. Basically not showing them on the terminal screen.
-#                   -Moved the 'trap' further up becuase way not?!
-#                   -Added a delay before ejecting '$DEST' becuase it was somehow always busy right after 'rsync'.
+# What's New?   :   -Added '-H' (preserve hard links) and '-h' (human readable) to 'rsync'. (Hard links may not allow for proper cloning; yet to be tested.)
+#                   -Added the feature to show time elapsed for cloning. (i.e. for 'rsync' and 'bless')
+#                   -Text formatting
+#                   -Added 'sudo' to 'diskutil eject '$DEST' so that the disk might actually eject! Also, the computer will keep trying until '$DEST' ejects.
+#                   -Added a new little function that makes the system 'say' "Complete" on finishing cloning.
+#                   -'shutdownOnCompletion' is now set to 'false' by default. Now, you have to pass '-s' as an argument for the system to shutdown.
 
 # VARIABLES
 DEST="/Volumes/SSSD0/"
 CLONE_WARS="/Users/sagarpatel/bin/CLONE WARS.m4a"
 EXCLUDE_FILE="/Users/sagarpatel/bin/rsync_excludes.txt"
 shutdownTimeout=1
-shutdownOnCompletion=true
+shutdownOnCompletion=false
 playMusic=true
-VERSION="CLONE WARS v1.2"
+VERSION="CLONE WARS v1.2.1"
 
 clear
 
@@ -58,8 +58,8 @@ while getopts msv option; do
         ;;
 
         s)
-        shutdownOnCompletion=false
-        echo "The system will not shut down on completion of cloning."
+        shutdownOnCompletion=true
+        echo "The system will shut down on completion of cloning."
         ;;
 
         v)
@@ -111,11 +111,12 @@ if [ $(uname) != "Darwin" ]; then
     exit 6
 fi
 
+showVersion
+
 # play the 'CLONE WARS' music
 if [ $playMusic = "true" ]; then
     for i in {1..3}; do echo -n ". "; sleep 0.5; done
-    clear
-    showVersion
+    # clear (removed for text formatting)
     afplay "$CLONE_WARS" & afplayPID=$!
 fi
 
@@ -123,14 +124,29 @@ fi
 # ref. 7
 caffeinate -i & caffeinatePID=$!
 
-# hey, I removed '-i' after sudo (and before 'rsync') for debugging.
-# UPDATE : It works good, seems like it'll be okay without '-i'.
-sudo rsync -vaxE --progress --delete --exclude-from="$EXCLUDE_FILE" / "$DEST"
+# finding out the time taken for the cloning to complete.
+# ref. 15
+SECONDS=0
+
+sudo rsync -vaxEHh --progress --delete --exclude-from="$EXCLUDE_FILE" / "$DEST"
+echo
 echo "==========Finished copying=========="
-sudo bless -folder "$DEST"/System/Library/CoreServices && echo "==========Blessed the CoreServices.=========="
-echo "Just a bit more time..."
-sleep 5
-diskutil eject "$DEST"
+sudo bless -folder "$DEST"/System/Library/CoreServices
+echo "==========Blessed the CoreServices=========="
+
+# calculating and displaying time taken for cloning.
+# ref. 15
+duration=$SECONDS
+echo
+echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
+say "Complete"
+echo "Just a bit more time"
+echo
+
+while [ -d "$DEST" ]; do
+    sleep 15
+    sudo diskutil eject "$DEST"
+done
 kill "$caffeinatePID"
 
 # ref. 3 & 8
@@ -184,6 +200,9 @@ exit 0
 
 # 14. Using 'getopts' for extracting options from parsed arguments
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
+
+# 15. Finding out time elapsed in a bash script
+# http://stackoverflow.com/questions/8903239/how-to-calculate-time-difference-in-bash-script
 
 # EXIT/ERROR CODES
 # 0 : Cloned Successfully
