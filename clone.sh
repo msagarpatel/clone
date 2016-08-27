@@ -1,16 +1,12 @@
 #! /bin/bash
 
 # Author        :   Sagar Patel
-# Version       :   1.2.1
-# Date          :   May 25, 2016
+# Version       :   1.2.2
+# Date          :   Aug 26, 2016
 # What?         :   This little script here is used to create a bootable copy of your boot drive. This will clone the system root folder (i.e. '/') to '$DEST'. You can change '$DEST' below to whatever drive you want.
 
-# What's New?   :   -Added '-H' (preserve hard links) and '-h' (human readable) to 'rsync'. (Hard links may not allow for proper cloning; yet to be tested.)
-#                   -Added the feature to show time elapsed for cloning. (i.e. for 'rsync' and 'bless')
-#                   -Text formatting
-#                   -Added 'sudo' to 'diskutil eject '$DEST' so that the disk might actually eject! Also, the computer will keep trying until '$DEST' ejects.
-#                   -Added a new little function that makes the system 'say' "Complete" on finishing cloning.
-#                   -'shutdownOnCompletion' is now set to 'false' by default. Now, you have to pass '-s' as an argument for the system to shutdown.
+# What's New?   :   -changed from '-i' to '-d' in caffeinate.
+#                   -added "--stats --itemize-changes" to rsync command.
 
 # VARIABLES
 DEST="/Volumes/SSSD0/"
@@ -19,7 +15,7 @@ EXCLUDE_FILE="/Users/sagarpatel/bin/rsync_excludes.txt"
 shutdownTimeout=1
 shutdownOnCompletion=false
 playMusic=true
-VERSION="CLONE WARS v1.2.1"
+VERSION="CLONE WARS v1.2.2"
 
 clear
 
@@ -122,13 +118,13 @@ fi
 
 # prevent system from going into idle sleep (using 'caffeinate' instead of 'pmset idle' because it is deprecated in favour of the former.)
 # ref. 7
-caffeinate -i & caffeinatePID=$!
+caffeinate -d & caffeinatePID=$!
 
 # finding out the time taken for the cloning to complete.
 # ref. 15
 SECONDS=0
 
-sudo rsync -vaxEHh --progress --delete --exclude-from="$EXCLUDE_FILE" / "$DEST"
+sudo rsync -vaxEHh --progress --delete --stats --itemize-changes --exclude-from="$EXCLUDE_FILE" / "$DEST"
 echo
 echo "==========Finished copying=========="
 sudo bless -folder "$DEST"/System/Library/CoreServices
