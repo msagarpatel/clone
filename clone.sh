@@ -1,21 +1,22 @@
 #! /bin/bash
 
 # Author        :   Sagar Patel
-# Version       :   1.2.2
-# Date          :   Aug 26, 2016
+# Version       :   1.2.3
+# Date          :   Sep 25, 2016
 # What?         :   This little script here is used to create a bootable copy of your boot drive. This will clone the system root folder (i.e. '/') to '$DEST'. You can change '$DEST' below to whatever drive you want.
 
-# What's New?   :   -changed from '-i' to '-d' in caffeinate.
-#                   -added "--stats --itemize-changes" to rsync command.
+# What's New?   :   -fixed the 'mute' option so that it mutes the "Complete" annoucement after rsync completes.
+#                   -changed 'shutdownTimeout' to '0' instead of '1'.
+#                   -changed sleep time for failed DEST eject to '10'.
 
 # VARIABLES
 DEST="/Volumes/SSSD0/"
 CLONE_WARS="/Users/sagarpatel/bin/CLONE WARS.m4a"
 EXCLUDE_FILE="/Users/sagarpatel/bin/rsync_excludes.txt"
-shutdownTimeout=1
+shutdownTimeout=0
 shutdownOnCompletion=false
-playMusic=true
-VERSION="CLONE WARS v1.2.2"
+mute=false
+VERSION="CLONE WARS v1.2.3"
 
 clear
 
@@ -49,7 +50,7 @@ while getopts msv option; do
     case $option in
 
         m)
-        playMusic=false
+        mute=true
         echo "Okay, no music. You're such an bore-snore."
         ;;
 
@@ -86,7 +87,7 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 if [ ! -f "$CLONE_WARS" ]; then
-    playMusic=false
+    mute=true
     echo "==========ERROR 4=========="
     echo "$CLONE_WARS not found, but that's cool we won't play it..."
 fi
@@ -110,7 +111,7 @@ fi
 showVersion
 
 # play the 'CLONE WARS' music
-if [ $playMusic = "true" ]; then
+if [ $mute = "false" ]; then
     for i in {1..3}; do echo -n ". "; sleep 0.5; done
     # clear (removed for text formatting)
     afplay "$CLONE_WARS" & afplayPID=$!
@@ -135,12 +136,14 @@ echo "==========Blessed the CoreServices=========="
 duration=$SECONDS
 echo
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
-say "Complete"
+if [ $mute = "false" ]; then
+    say "Complete"
+fi
 echo "Just a bit more time"
 echo
 
 while [ -d "$DEST" ]; do
-    sleep 15
+    sleep 10
     sudo diskutil eject "$DEST"
 done
 kill "$caffeinatePID"
