@@ -1,22 +1,23 @@
 #! /bin/bash
 
 # Author        :   Sagar Patel
-# Version       :   1.2.3
-# Date          :   Sep 25, 2016
+# Version       :   1.3
+# Date          :   Nov 15, 2016
 # What?         :   This little script here is used to create a bootable copy of your boot drive. This will clone the system root folder (i.e. '/') to '$DEST'. You can change '$DEST' below to whatever drive you want.
 
-# What's New?   :   -fixed the 'mute' option so that it mutes the "Complete" annoucement after rsync completes.
-#                   -changed 'shutdownTimeout' to '0' instead of '1'.
-#                   -changed sleep time for failed DEST eject to '10'.
+# What's New?   :   -killed the CLONE WARS music. RIP.
+#                   -changed 'shutdownTimeout' back to '1'.
+#                   -added time of completion at end using 'date'.
+#                   -removed that thing about how the script only runs on Darwin. Only tested on Darwin though.
+#                   -added some text to an error message for clarity.
 
 # VARIABLES
 DEST="/Volumes/SSSD0/"
-CLONE_WARS="/Users/sagarpatel/bin/CLONE WARS.m4a"
 EXCLUDE_FILE="/Users/sagarpatel/bin/rsync_excludes.txt"
-shutdownTimeout=0
+shutdownTimeout=1
 shutdownOnCompletion=false
 mute=false
-VERSION="CLONE WARS v1.2.3"
+VERSION="CLONE WARS v1.3"
 
 clear
 
@@ -24,7 +25,6 @@ clear
 # ref. 12 & 13
 exiting () {
 echo "Well, now that you want to exit... BYE."
-kill $afplayPID 2> /dev/null
 kill $caffeinatePID 2> /dev/null
 exit 7
 }
@@ -51,7 +51,7 @@ while getopts msv option; do
 
         m)
         mute=true
-        echo "Okay, no music. You're such an bore-snore."
+        echo "Okay, I'll keep hush."
         ;;
 
         s)
@@ -66,6 +66,7 @@ while getopts msv option; do
 
         *)
         echo "==========ERROR 3=========="
+        echo "You have entered an invalid option."
         exit 3
         ;;
 
@@ -86,12 +87,6 @@ if [ $(id -u) -ne 0 ]; then
 	exit 2
 fi
 
-if [ ! -f "$CLONE_WARS" ]; then
-    mute=true
-    echo "==========ERROR 4=========="
-    echo "$CLONE_WARS not found, but that's cool we won't play it..."
-fi
-
 if [ ! -f "$EXCLUDE_FILE" ]; then
     echo "==========ERROR 8=========="
     echo "$EXCLUDE_FILE not found."
@@ -100,22 +95,7 @@ if [ ! -f "$EXCLUDE_FILE" ]; then
     exit 8
 fi
 
-# ref. 10
-# check to see of the OS is OS X (Darwin), as the script only supports OS X
-if [ $(uname) != "Darwin" ]; then
-    echo "==========ERROR 6=========="
-    echo "This script only supports OS X (Darwin)."
-    exit 6
-fi
-
 showVersion
-
-# play the 'CLONE WARS' music
-if [ $mute = "false" ]; then
-    for i in {1..3}; do echo -n ". "; sleep 0.5; done
-    # clear (removed for text formatting)
-    afplay "$CLONE_WARS" & afplayPID=$!
-fi
 
 # prevent system from going into idle sleep (using 'caffeinate' instead of 'pmset idle' because it is deprecated in favour of the former.)
 # ref. 7
@@ -147,6 +127,8 @@ while [ -d "$DEST" ]; do
     sudo diskutil eject "$DEST"
 done
 kill "$caffeinatePID"
+# print the current date and time (time of completion)
+date
 
 # ref. 3 & 8
 if [ $shutdownOnCompletion = "true" ]; then
@@ -205,11 +187,11 @@ exit 0
 
 # EXIT/ERROR CODES
 # 0 : Cloned Successfully
-# 1 : The destination volume, $DEST, was not present. (Note: $DEST is the destination volume)
+# 1 : The destination volume, $DEST, was not present.
 # 2 : 'clone' needs to be run as root. (ie. use 'sudo clone')
 # 3 : An invalid argument was passed.
-# 4 : '$CLONE_WARS' was not found. Look for it.
+# 4 : '$CLONE_WARS' was not found. Look for it. (deprecated)
 # 5 : Printed version number and exited.
-# 6 : The script only supports OS X (Darwin)
+# 6 : The script only supports OS X (Darwin) (deprecated)
 # 7 : The script was killed while working.
 # 8 : '$EXCLUDE_FILE' was not found at the set location.
