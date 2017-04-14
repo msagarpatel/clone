@@ -1,15 +1,11 @@
 #! /bin/bash
 
 # Author        :   Sagar Patel
-# Version       :   1.3
-# Date          :   Nov 15, 2016
+# Version       :   1.3.1
+# Date          :   Apr 13, 2017
 # What?         :   This little script here is used to create a bootable copy of your boot drive. This will clone the system root folder (i.e. '/') to '$DEST'. You can change '$DEST' below to whatever drive you want.
 
-# What's New?   :   -killed the CLONE WARS music. RIP.
-#                   -changed 'shutdownTimeout' back to '1'.
-#                   -added time of completion at end using 'date'.
-#                   -removed that thing about how the script only runs on Darwin. Only tested on Darwin though.
-#                   -added some text to an error message for clarity.
+# What's New?   :   -added the file in the root of the clone called 'DATEandTIME.txt'. It contains the date and time the clone was completed.
 
 # VARIABLES
 DEST="/Volumes/SSSD0/"
@@ -17,7 +13,7 @@ EXCLUDE_FILE="/Users/sagarpatel/bin/rsync_excludes.txt"
 shutdownTimeout=1
 shutdownOnCompletion=false
 mute=false
-VERSION="CLONE WARS v1.3"
+VERSION="CLONE WARS v1.3.1"
 
 clear
 
@@ -119,6 +115,8 @@ echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 if [ $mute = "false" ]; then
     say "Complete"
 fi
+# store the date of the clone in file 'DATEandTIME.txt' in root.
+echo $(date) > "$DEST"DATEandTIME.txt
 echo "Just a bit more time"
 echo
 
