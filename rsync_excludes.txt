@@ -1,0 +1,34 @@
+.Spotlight-*/
+.Trashes
+/afs/*
+/automount/*
+/cores/*
+/dev/*
+/Network/*
+/private/tmp/*
+/private/var/run/*
+/private/var/spool/postfix/*
+/private/var/vm/*
+/Previous Systems.localized
+/tmp/*
+/Volumes/*
+*/.Trash
+.DocumentRevisions-V100*
+.Spotlight-V100
+/.fseventsd
+/.hotfiles.btree
+/private/var/db/systemstats
+/private/var/db/dyld/dyld_*
+/System/Library/Caches/com.apple.bootstamps/*
+/System/Library/Caches/com.apple.corestorage/*
+/System/Library/Caches/com.apple.kext.caches/*
+/.vol/*
+/net
+/private/var/folders/zz/*
+/Backups.backupdb
+/.MobileBackups
+/.MobileBackups.trash
+Library/Mobile Documents.*
+.webtmp
+/.bzvol
+$Recycle.Bin
