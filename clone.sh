@@ -57,7 +57,7 @@ while getopts msv option; do
 
         v)
         showVersion
-        exit 5
+        exit 0
         ;;
 
         *)
@@ -134,6 +134,7 @@ if [ $shutdownOnCompletion = "true" ]; then
 fi
 exit 0
 
+
 # SOURCES
 # http://serverfault.com/questions/269996/optimal-backup-to-swappable-hard-drive-with-rsync-on-osx
 # https://bombich.com/kb/ccc4/some-files-and-folders-are-automatically-excluded-from-backup-task
@@ -183,13 +184,14 @@ exit 0
 # 15. Finding out time elapsed in a bash script
 # http://stackoverflow.com/questions/8903239/how-to-calculate-time-difference-in-bash-script
 
-# EXIT/ERROR CODES
-# 0 : Cloned Successfully
+
+# EXIT CODES
+# 0 : No problems
 # 1 : The destination volume, $DEST, was not present.
 # 2 : 'clone' needs to be run as root. (ie. use 'sudo clone')
 # 3 : An invalid argument was passed.
-# 4 : '$CLONE_WARS' was not found. Look for it. (deprecated)
-# 5 : Printed version number and exited.
-# 6 : The script only supports OS X (Darwin) (deprecated)
+# 4 : (removed) '$CLONE_WARS' was not found. Look for it.
+# 5 : (removed) Printed version number and exited.
+# 6 : (removed) The script only supports OS X (Darwin)
 # 7 : The script was killed while working.
 # 8 : '$EXCLUDE_FILE' was not found at the set location.
