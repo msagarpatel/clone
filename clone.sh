@@ -13,7 +13,6 @@ DISK=$(diskutil info $DEST | grep -h -m 1 'APFS Physical Store' | egrep -o 'disk
 EXCLUDE_FILE="$HOME/bin/clone/rsync_excludes.txt"
 shutdownTimeout=1
 shutdownOnCompletion=false
-mute=false
 VERSION="CLONE WARS v1.3.1"
 
 clear
@@ -43,13 +42,8 @@ echo
 # Checking and setting the passed arguments
 # ref. 14
 # OLD : while [[ $# -ne 0 ]]; do
-while getopts msv option; do
+while getopts sv option; do
     case $option in
-
-        m)
-        mute=true
-        echo "Okay, I'll keep hush."
-        ;;
 
         s)
         shutdownOnCompletion=true
@@ -113,18 +107,14 @@ echo "==========Blessed the CoreServices=========="
 duration=$SECONDS
 echo
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
-if [ $mute = "false" ]; then
-    say "Complete"
-fi
 # store the date of the clone in file 'DATEandTIME.txt' in root.
 date > "$DEST"/DATEandTIME.txt
 echo "Just a bit more time"
-echo
 
 sleep 10
 diskutil eject $DISK
 kill "$caffeinatePID"
-date
+echo "Completed at $(date)"
 
 # ref. 3 & 8
 if [ $shutdownOnCompletion = "true" ]; then
