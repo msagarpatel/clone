@@ -8,8 +8,9 @@
 # What's New?   :   -added the file in the root of the clone called 'DATEandTIME.txt'. It contains the date and time the clone was completed.
 
 # VARIABLES
-DEST="/Volumes/SSSD0/"
-EXCLUDE_FILE="/Users/sagarpatel/bin/rsync_excludes.txt"
+DEST="/Volumes/SSSD0"
+DISK=$(diskutil info $DEST | grep -h -m 1 'APFS Physical Store' | egrep -o 'disk[0-9]+')
+EXCLUDE_FILE="$HOME/bin/clone/rsync_excludes.txt"
 shutdownTimeout=1
 shutdownOnCompletion=false
 mute=false
@@ -116,16 +117,13 @@ if [ $mute = "false" ]; then
     say "Complete"
 fi
 # store the date of the clone in file 'DATEandTIME.txt' in root.
-echo $(date) > "$DEST"DATEandTIME.txt
+date > "$DEST"/DATEandTIME.txt
 echo "Just a bit more time"
 echo
 
-while [ -d "$DEST" ]; do
-    sleep 10
-    sudo diskutil eject "$DEST"
-done
+sleep 10
+diskutil eject $DISK
 kill "$caffeinatePID"
-# print the current date and time (time of completion)
 date
 
 # ref. 3 & 8
