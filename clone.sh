@@ -13,7 +13,7 @@ DISK=$(diskutil info $DEST | grep -h -m 1 'APFS Physical Store' | egrep -o 'disk
 EXCLUDE_FILE="$HOME/bin/clone/rsync_excludes.txt"
 shutdownTimeout=1
 shutdownOnCompletion=false
-VERSION="CLONE WARS v1.3.1"
+echo "CLONE WARS v1.3.1"
 
 clear
 
@@ -26,33 +26,18 @@ exit 7
 }
 trap exiting INT
 
-# show the version in a ridiculous way
-showVersion() {
-echo
-echo " ###### #      ###### #     # ######   #             #    #     ###### ###### "
-echo " #      #      #    # ##    # #         #     #     #    # #    #    # #      "
-echo " #      #      #    # #  #  # #####      #   # #   #    #   #   ###### ###### "
-echo " #      #      #    # #    ## #           # #   # #    # ### #  # ##        # "
-echo " ###### ###### ###### #     # ######       #     #    #       # #   ## ###### "
-echo
-echo $VERSION
-echo
-}
-
 # Checking and setting the passed arguments
 # ref. 14
-# OLD : while [[ $# -ne 0 ]]; do
-while getopts sv option; do
+while getopts vs option; do
     case $option in
+
+        v)
+        exit 0
+        ;;
 
         s)
         shutdownOnCompletion=true
         echo "The system will shut down on completion of cloning."
-        ;;
-
-        v)
-        showVersion
-        exit 0
         ;;
 
         *)
@@ -85,8 +70,6 @@ if [ ! -f "$EXCLUDE_FILE" ]; then
     echo "If not present, it will copy every file on the hard drive, which is not recommended."
     exit 8
 fi
-
-showVersion
 
 # prevent system from going into idle sleep (using 'caffeinate' instead of 'pmset idle' because it is deprecated in favour of the former.)
 # ref. 7
