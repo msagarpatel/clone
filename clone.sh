@@ -1,11 +1,14 @@
-#! /bin/bash
-
+#!/bin/zsh
 # Author        :   Sagar Patel
 # Version       :   1.3.1
 # Date          :   Apr 13, 2017
-# What?         :   This little script here is used to create a bootable copy of your boot drive. This will clone the system root folder (i.e. '/') to '$DEST'. You can change '$DEST' below to whatever drive you want.
+# What?         :   This little script here is used to create a bootable copy of
+#                   your boot drive. This will clone the system root folder
+#                   (i.e. '/') to '$DEST'. You can change '$DEST' below to
+#                   whatever drive you want.
 
-# What's New?   :   -added the file in the root of the clone called 'DATEandTIME.txt'. It contains the date and time the clone was completed.
+# What's New?   :   -add APFS support (and require APFS)
+#                   -remove mute option
 
 # VARIABLES
 DEST="/Volumes/SSSD0"
@@ -15,13 +18,12 @@ shutdownTimeout=1
 shutdownOnCompletion=false
 echo "CLONE WARS v1.3.1"
 
-clear
 
-# used to 'trap' and kill the entire script with Ctrl+C. I have no idea how it works.
+# used to 'trap' and kill the entire script with Ctrl+C.
 # ref. 12 & 13
 exiting () {
 echo "Well, now that you want to exit... BYE."
-kill $caffeinatePID 2> /dev/null
+kill $caffeinatePID
 exit 7
 }
 trap exiting INT
@@ -71,15 +73,13 @@ if [ ! -f "$EXCLUDE_FILE" ]; then
     exit 8
 fi
 
-# prevent system from going into idle sleep (using 'caffeinate' instead of 'pmset idle' because it is deprecated in favour of the former.)
 # ref. 7
 caffeinate -d & caffeinatePID=$!
 
 # finding out the time taken for the cloning to complete.
 # ref. 15
 SECONDS=0
-
-sudo rsync -vaxEHh --progress --delete --stats --itemize-changes --exclude-from="$EXCLUDE_FILE" / "$DEST"
+sudo rsync -xrlptgoXvHSh --progress --delete --stats --fileflags --exclude-from="$EXCLUDE_FILE" / "$DEST"
 echo
 echo "==========Finished copying=========="
 sudo bless -folder "$DEST"/System/Library/CoreServices
